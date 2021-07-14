@@ -11,7 +11,24 @@ namespace Big_Number_Calculator
         public List<byte> Digits = new();
         public bool IsNegative { get; set; }
         public bool IsEqualToZero { get { return Digits.Count == 1 && Digits[0] == 0; } }
-
+        public static LargeNumber Exp(byte val, int exp)
+        {
+            if (exp < 0)
+            {
+                throw new ArgumentException();
+            }
+            if (exp == 0)
+            {
+                return new LargeNumber(val);
+            }
+            LargeNumber bigInt = 0;
+            for (int i = 1; i < exp; i++)
+            {
+                bigInt.Digits.Insert(0,0);
+            }
+            bigInt.Digits.Insert(0, val);
+            return bigInt;
+        }
         public LargeNumber(string number)
         {
             if (!CheckValidityOfNumber(number))

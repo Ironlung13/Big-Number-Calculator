@@ -159,12 +159,32 @@ namespace Big_Number_Calculator
         }
         public static LargeNumber DivideWhole(LargeNumber x, LargeNumber y)
         {
+            if (y.IsEqualToZero)
+            {
+                throw new InvalidOperationException("Tried to divide by zero.");
+            }
+            if (x.IsEqualToZero || x.ModCompareTo(y) < 0)
+            {
+                return 0;
+            }
+            if (x.ModCompareTo(y) == 0)
+            {
+                if (x.IsNegative != y.IsNegative)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+
             StringBuilder result = new();
             LargeNumber curValue = 0;
 
-            for (var i = 0; i < x.Digits.Count; i++)
+            for (int i = 0; i < x.Digits.Count; i++)
             {
-                curValue += x.Digits[i] * (int)Math.Pow(10, x.Digits.Count - 1 - i);
+                curValue += LargeNumber.Exp(x.Digits[i], x.Digits.Count - 1 - i);
 
                 var candidate = 0;
                 var lower = 0;
@@ -172,7 +192,7 @@ namespace Big_Number_Calculator
                 while (lower <= upper)
                 {
                     var currentCheck = (lower + upper) / 2;
-                    var cur = y * currentCheck * (int)Math.Pow(10, x.Digits.Count - 1 - i);
+                    var cur = y * LargeNumber.Exp((byte)currentCheck, x.Digits.Count - 1 - i);
                     if (cur <= curValue)
                     {
                         candidate = currentCheck;
@@ -185,12 +205,59 @@ namespace Big_Number_Calculator
                 }
 
                 result.Append(candidate % 10);
-                var divided = y * candidate * (int)Math.Pow(10, x.Digits.Count - 1 - i);
+                var divided = y * LargeNumber.Exp((byte)candidate, x.Digits.Count - 1 - i);
                 curValue -= divided;
             }
 
-            var retValue = new LargeNumber(result.ToString());
-            retValue.IsNegative = x.IsNegative == y.IsNegative ? false : true;
+            var retValue = new LargeNumber(result.ToString())
+            {
+                IsNegative = x.IsNegative != y.IsNegative
+            };
+            return retValue;
+        }
+        public static LargeNumber DivideMod(LargeNumber x, LargeNumber y)
+        {
+            if (y.IsEqualToZero)
+            {
+                throw new InvalidOperationException("Tried to divide by zero.");
+            }
+            if (x.ModCompareTo(y) < 0)
+            {
+                LargeNumber result = new(x.ToString());
+                result.IsNegative = false;
+                return result;
+            }
+            if (x.ModCompareTo(y) == 0)
+            {
+                return 0;
+            }
+            LargeNumber retValue = 0;
+            for (int i = 0; i < x.Digits.Count; i++)
+            {
+                retValue += LargeNumber.Exp(x.Digits[i], x.Digits.Count - i - 1);
+
+                var candidate = 0;
+                var lower = 0;
+                var upper = 10;
+
+                while (lower <= upper)
+                {
+                    var currentCheck = (lower + upper) / 2;
+                    var cur = y * LargeNumber.Exp((byte)currentCheck, x.Digits.Count - i - 1);
+                    if (cur <= retValue)
+                    {
+                        candidate = currentCheck;
+                        lower = currentCheck + 1;
+                    }
+                    else
+                    {
+                        upper = currentCheck - 1;
+                    }
+                }
+                retValue -= y * LargeNumber.Exp((byte)candidate, x.Digits.Count - i - 1);
+            }
+
+            retValue.IsNegative = x.IsNegative != y.IsNegative;
             return retValue;
         }
         private static StringBuilder SingleDigitMultiply(List<byte> number, byte digit)
