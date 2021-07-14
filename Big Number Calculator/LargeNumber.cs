@@ -1,0 +1,196 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Big_Number_Calculator
+{
+    public class LargeNumber : IComparable<int>
+    {
+        public List<byte> Digits = new();
+        public bool IsNegative { get; set; }
+        public bool IsEqualToZero { get { return Digits.Count == 1 && Digits[0] == 0; } }
+
+        public LargeNumber(string number)
+        {
+            if (!CheckValidityOfNumber(number))
+            {
+                throw new ArgumentException("Tried to assign non-comp string to LargeNumber instance.");
+            }
+            try
+            {
+                StringBuilder sb = new(number.Trim());
+                IsNegative = sb[0] == '-' ? true : false;
+                if (IsNegative)
+                {
+                    sb.Remove(0, 1);
+                }
+
+                while (sb[0] == '0' && sb.Length > 1)
+                {
+                    sb.Remove(0, 1);
+                }
+
+                Digits = new();
+                int i = 0;
+                while (i < sb.Length)
+                {
+                    Digits.Add((byte)char.GetNumericValue(sb[i])); //check for errors
+                    i++;
+                }
+
+                if (Digits.Count == 1 && Digits[0] == 0)
+                {
+                    IsNegative = false;
+                }
+            }
+            catch (IndexOutOfRangeException)
+            {
+                throw new IndexOutOfRangeException("Number is too short");
+            }
+            catch
+            {
+                throw new ArgumentException($"Something's wrong with {number}");
+            }
+        }
+        public LargeNumber(int number) : this(number.ToString()) { }
+        public LargeNumber() : this(0) { }
+        public override string ToString()
+        {
+            StringBuilder result = new();
+            if (IsNegative)
+            {
+                result.Append("-");
+            }
+            for (int i = 0; i < Digits.Count; i++)
+            {
+                result.Append(Digits[i]);
+            }
+
+            return result.ToString();
+        }
+        public static bool CheckValidityOfNumber(string number)
+        {
+            number = number.Trim();
+            try
+            {
+                int i = 0;
+                if (number[i] == '-')
+                {
+                    i = 1;
+                }
+                while (i < number.Length)
+                {
+                    if (!char.IsDigit(number[i]))
+                    {
+                        return false;
+                    }
+                    i++;
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public int ModCompareTo(LargeNumber other)
+        {
+            if (Digits.Count > other.Digits.Count)
+            {
+                return 1;
+            }
+            if (Digits.Count < other.Digits.Count)
+            {
+                return -1;
+            }
+
+            for (int i = 0; i < Digits.Count; i++)
+            {
+                if (Digits[i] > other.Digits[i])
+                {
+                    return 1;
+                }
+                if (Digits[i] < other.Digits[i])
+                {
+                    return -1;
+                }
+            }
+            return 0;
+
+        }
+        public int CompareTo(LargeNumber other)
+        {
+            LargeNumber result = this - other;
+            if (result.IsEqualToZero)
+            {
+                return 0;
+            }
+            else if (result.IsNegative)
+            {
+                return -1;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+        public int CompareTo(int other)
+        {
+            LargeNumber result = this - new LargeNumber(other);
+            if (result.IsEqualToZero)
+            {
+                return 0;
+            }
+            else if (result.IsNegative)
+            {
+                return -1;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+        public static LargeNumber operator *(LargeNumber x, LargeNumber y)
+        {
+            return LargeNumberCalculator.Multiply(x, y);
+        }
+        public static LargeNumber operator +(LargeNumber x, LargeNumber y)
+        {
+            return LargeNumberCalculator.Add(x, y);
+        }
+        public static LargeNumber operator -(LargeNumber x, LargeNumber y)
+        {
+            return LargeNumberCalculator.Subtract(x, y);
+        }
+        public static LargeNumber operator -(LargeNumber x)
+        {
+            LargeNumber result = new LargeNumber();
+            result.Digits = x.Digits.ToList();
+            result.IsNegative = x.IsNegative ? false : true;
+            return result;
+        }
+        public static implicit operator LargeNumber(string number)
+        {
+            return new LargeNumber(number);
+        }
+        public static implicit operator LargeNumber(int number)
+        {
+            return new LargeNumber(number);
+        }
+        public static bool operator <(LargeNumber a, LargeNumber b) => a.CompareTo(b) < 0;
+
+        public static bool operator >(LargeNumber a, LargeNumber b) => a.CompareTo(b) > 0;
+
+        public static bool operator <=(LargeNumber a, LargeNumber b) => a.CompareTo(b) <= 0;
+
+        public static bool operator >=(LargeNumber a, LargeNumber b) => a.CompareTo(b) >= 0;
+
+        public static bool operator ==(LargeNumber a, LargeNumber b) => a.CompareTo(b) == 0;
+
+        public static bool operator !=(LargeNumber a, LargeNumber b) => a.CompareTo(b) != 0;
+
+        public override bool Equals(object obj) => !(obj is LargeNumber) ? false : this == (LargeNumber)obj; //????
+    }
+}
