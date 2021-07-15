@@ -41,7 +41,7 @@ namespace Big_Number_Calculator
             {
                 int temp = xCopy[i] + yCopy[i] + remainder;
                 remainder = temp / 10;
-                temp = temp % 10;
+                temp %= 10;
                 result.Insert(0, temp);
             }
             if (remainder != 0)
@@ -107,7 +107,7 @@ namespace Big_Number_Calculator
                 }
             }
             //Get final result
-            LargeNumber res = new LargeNumber(result.ToString());
+            LargeNumber res = new(result.ToString());
             if (largerOne == -1)
             {
                 return -res;
@@ -144,7 +144,7 @@ namespace Big_Number_Calculator
                 {
                     numberByDigitResult.Append(0);
                 }
-                LargeNumber temp = new LargeNumber(numberByDigitResult.ToString());
+                LargeNumber temp = new(numberByDigitResult.ToString());
                 result += temp;
             }
 
@@ -269,7 +269,7 @@ namespace Big_Number_Calculator
             {
                 temp = number[i] * digit + remainder;
                 remainder = temp / 10;
-                temp = temp % 10;
+                temp %= 10;
                 result.Insert(0, temp);
             }
             result.Insert(0, remainder);

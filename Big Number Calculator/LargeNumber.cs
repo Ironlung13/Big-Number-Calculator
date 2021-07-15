@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Big_Number_Calculator
 {
@@ -13,10 +12,6 @@ namespace Big_Number_Calculator
         public bool IsEqualToZero { get { return Digits.Count == 1 && Digits[0] == 0; } }
         public static LargeNumber Exp(byte val, int exp)
         {
-            if (exp < 0)
-            {
-                throw new ArgumentException();
-            }
             if (exp == 0)
             {
                 return new LargeNumber(val);
@@ -38,7 +33,7 @@ namespace Big_Number_Calculator
             try
             {
                 StringBuilder sb = new(number.Trim());
-                IsNegative = sb[0] == '-' ? true : false;
+                IsNegative = sb[0] == '-';
                 if (IsNegative)
                 {
                     sb.Remove(0, 1);
@@ -78,7 +73,7 @@ namespace Big_Number_Calculator
             StringBuilder result = new();
             if (IsNegative)
             {
-                result.Append("-");
+                result.Append('-');
             }
             for (int i = 0; i < Digits.Count; i++)
             {
@@ -183,9 +178,9 @@ namespace Big_Number_Calculator
         }
         public static LargeNumber operator -(LargeNumber x)
         {
-            LargeNumber result = new LargeNumber();
+            LargeNumber result = new();
             result.Digits = x.Digits.ToList();
-            result.IsNegative = x.IsNegative ? false : true;
+            result.IsNegative = !x.IsNegative;
             return result;
         }
         public static implicit operator LargeNumber(string number)
@@ -208,6 +203,11 @@ namespace Big_Number_Calculator
 
         public static bool operator !=(LargeNumber a, LargeNumber b) => a.CompareTo(b) != 0;
 
-        public override bool Equals(object obj) => !(obj is LargeNumber) ? false : this == (LargeNumber)obj; //????
+        public override bool Equals(object obj) => obj is LargeNumber number && this == number;
+
+        public override int GetHashCode()
+        {
+            return Digits.GetHashCode();
+        }
     }
 }
